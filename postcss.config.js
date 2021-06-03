@@ -1,13 +1,13 @@
-var postcssFocusWithin = require('postcss-focus-within');
-
 module.exports = {
-    plugins: {
-        autoprefixer: {}
-    }
-};
-
-module.exports = {
-    plugins: [
-        postcssFocusWithin(/* pluginOptions */)
-    ]
+	plugins: [
+		require('postcss-nested'),
+		require('postcss-css-variables')({
+			preserve: false,
+			preserveAtRulesOrder: true
+		}),
+		require('postcss-calc')({
+			precision: 0
+		}),
+		require('postcss-discard-duplicates')
+	]
 };

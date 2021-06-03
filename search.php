@@ -5,52 +5,61 @@
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#search-result
  *
  * @package WordPress
- * @subpackage Twenty_Nineteen
- * @since Twenty Nineteen 1.0
+ * @subpackage Twenty_Twenty_One
+ * @since Twenty Twenty-One 1.0
  */
 
 get_header();
-?>
 
-	<div id="primary" class="content-area">
-		<main id="main" class="site-main">
-
-		<?php if ( have_posts() ) : ?>
-
-			<header class="page-header">
-				<h1 class="page-title">
-					<?php _e( 'Search results for: ', 'twentynineteen' ); ?>
-					<span class="page-description"><?php echo get_search_query(); ?></span>
-				</h1>
-			</header><!-- .page-header -->
-
+if ( have_posts() ) {
+	?>
+	<header class="page-header alignwide">
+		<h1 class="page-title">
 			<?php
-			// Start the Loop.
-			while ( have_posts() ) :
-				the_post();
+			printf(
+				/* translators: %s: Search term. */
+				esc_html__( 'Results for "%s"', 'twentytwentyone' ),
+				'<span class="page-description search-term">' . esc_html( get_search_query() ) . '</span>'
+			);
+			?>
+		</h1>
+	</header><!-- .page-header -->
 
-				/*
-				 * Include the Post-Format-specific template for the content.
-				 * If you want to override this in a child theme, then include a file
-				 * called content-___.php (where ___ is the Post Format name) and that
-				 * will be used instead.
-				 */
-				get_template_part( 'template-parts/content/content', 'excerpt' );
-
-				// End the loop.
-			endwhile;
-
-			// Previous/next page navigation.
-			twentynineteen_the_posts_navigation();
-
-			// If no content, include the "No posts found" template.
-		else :
-			get_template_part( 'template-parts/content/content', 'none' );
-
-		endif;
+	<div class="search-result-count default-max-width">
+		<?php
+		printf(
+			esc_html(
+				/* translators: %d: The number of search results. */
+				_n(
+					'We found %d result for your search.',
+					'We found %d results for your search.',
+					(int) $wp_query->found_posts,
+					'twentytwentyone'
+				)
+			),
+			(int) $wp_query->found_posts
+		);
 		?>
-		</main><!-- #main -->
-	</div><!-- #primary -->
+	</div><!-- .search-result-count -->
+	<?php
+	// Start the Loop.
+	while ( have_posts() ) {
+		the_post();
 
-<?php
+		/*
+		 * Include the Post-Format-specific template for the content.
+		 * If you want to override this in a child theme, then include a file
+		 * called content-___.php (where ___ is the Post Format name) and that will be used instead.
+		 */
+		get_template_part( 'template-parts/content/content-excerpt', get_post_format() );
+	} // End the loop.
+
+	// Previous/next page navigation.
+	twenty_twenty_one_the_posts_navigation();
+
+	// If no content, include the "No posts found" template.
+} else {
+	get_template_part( 'template-parts/content/content-none' );
+}
+
 get_footer();

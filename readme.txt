@@ -1,31 +1,59 @@
-=== Twenty Nineteen ===
+=== Twenty Twenty-One ===
 Contributors: wordpressdotorg
-Tags: one-column, flexible-header, accessibility-ready, custom-colors, custom-menu, custom-logo, editor-style, featured-images, footer-widgets, rtl-language-support, sticky-post, threaded-comments, translation-ready, block-patterns
-Requires at least: 4.9.6
+Requires at least: 5.3
 Tested up to: 5.7
-Stable tag: 2.0
+Requires PHP: 5.6
+Stable tag: 1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Our 2019 default theme is designed to show off the power of the block editor.
-
 == Description ==
-Our 2019 default theme is designed to show off the power of the block editor. It features custom styles for all the default blocks, and is built so that what you see in the editor looks like what you'll see on your website. Twenty Nineteen is designed to be adaptable to a wide range of websites, whether you’re running a photo blog, launching a new business, or supporting a non-profit. Featuring ample whitespace and modern sans-serif headlines paired with classic serif body text, it's built to be beautiful on all screen sizes.
 
-For more information about Twenty Nineteen please go to https://wordpress.org/support/article/twenty-nineteen/.
+Twenty Twenty-One is a blank canvas for your ideas and it makes the block editor your best brush.
+
+With new block patterns, which allow you to create a beautiful layout in a matter of seconds, this theme’s soft colors and eye-catching — yet timeless — design will let your work shine.
+
+Take it for a spin! See how Twenty Twenty-One elevates your portfolio, business website, or personal blog.
 
 == Installation ==
 
 1. In your admin panel, go to Appearance -> Themes and click the 'Add New' button.
-2. Type in Twenty Nineteen in the search form and press the 'Enter' key on your keyboard.
+2. Type in Twenty Twenty-One in the search form and press the 'Enter' key on your keyboard.
 3. Click on the 'Activate' button to use your new theme right away.
-4. Go to https://wordpress.org/support/article/twenty-nineteen/ for a guide on how to customize this theme.
-5. Navigate to Appearance > Customize in your admin panel and customize to taste.
+4. Go to INSERT ABOUT PAGE for a guide on how to customize this theme.
+5. Navigate to Appearance > Customize in your admin panel and customize to your taste.
+
+== Privacy ==
+Twenty Twenty-One uses LocalStorage to save the setting when Dark Mode support is turned on or off.
+LocalStorage is necessary for the setting to work and is only used when a user clicks on the Dark Mode button.
+No data is saved in the database or transferred.
+
+== Changelog ==
+
+= 1.3 =
+* Released: April 14, 2021
+
+https://wordpress.org/support/article/twenty-twenty-one-changelog#Version_1.3
+
+= 1.2 =
+* Released: March 9, 2021
+
+https://wordpress.org/support/article/twenty-twenty-one-changelog#Version_1.2
+
+= 1.1 =
+* Released: December 22, 2020
+
+https://wordpress.org/support/article/twenty-twenty-one-changelog#Version_1.1
+
+= 1.0 =
+* Released: December 8, 2020
+
+https://wordpress.org/support/article/twenty-twenty-one-changelog#Version_1.0
 
 == Copyright ==
 
-Twenty Nineteen WordPress Theme, Copyright 2018-2021 WordPress.org
-Twenty Nineteen is distributed under the terms of the GNU GPL
+Twenty Twenty-One WordPress Theme, 2020-2021 WordPress.org
+Twenty Twenty-One is distributed under the terms of the GNU GPL.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -37,68 +65,50 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
-== Changelog ==
 
-= 2.0 =
-* Released: March 9, 2021
+Twenty Twenty-One is derived from Seedlet, (C) 2020 Automattic, Inc.
 
-https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_2.0
+Twenty Twenty-One is also based on:
 
-= 1.9 =
-* Released: December 22, 2020
+Twenty Nineteen. 2018-2021 WordPress.org
+Twenty Nineteen is distributed under the terms of the GNU GPL v2 or later.
 
-https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.9
+Twenty Seventeen. Copyright (C) 2016-2021 WordPress.org
+Twenty Seventeen is distributed under the terms of the GNU GPL v2 or later.
 
-= 1.8 =
-* Released: December 8, 2020
+Twenty Sixteen. Copyright (C) 2015-2021 WordPress.org
+Twenty Sixteen is distributed under the terms of the GNU GPL v2 or later.
 
-https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.8
+Twenty Twenty. Copyright (C) 2020-2021 WordPress.org
+Twenty Twenty is distributed under the terms of the GNU GPL v2 or later.
 
-= 1.7 =
-* Released: August 11, 2020
+Underscores https://underscores.me/, Copyright (C) 2012-2021 Automattic, Inc.
+Underscores is distributed under the terms of the GNU GPL v2 or later.
 
-https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.7
+Normalizing styles have been helped along thanks to the fine work of
+Nicolas Gallagher and Jonathan Neal https://necolas.github.io/normalize.css/
 
-= 1.6 =
-* Released: June 10, 2020
+Unless otherwise noted, the icons in this theme are derived from the WordPress
+Icons Library, licensed under the terms of the GNU GPL v2 or later.
+https://github.com/WordPress/gutenberg/tree/master/packages/icons
 
-https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.6
+This theme bundles the following third-party resources:
 
-= 1.5 =
-* Released: March 31, 2020
+input[type='checkbox'], input[type='radio'], input[type='ranged'],
+https://css-tricks.com/custom-styling-form-inputs-with-modern-css-features/
+https://css-tricks.com/styling-cross-browser-compatible-range-inputs-css/
+https://codepen.io/aaroniker/pen/ZEYoxEY Copyright (c) 2020 Aaron Iker
+https://codepen.io/chriscoyier/pen/FtnAa Copyright (c) 2020 Chris Coyier
+License: MIT.
 
-https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.5
-
-= 1.4 =
-* Released: May 7, 2019
-
-https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.4
-
-= 1.3 =
-* Released: February 21, 2019
-
-https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.3
-
-= 1.2 =
-* Released: January 9, 2019
-
-https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.2
-
-= 1.1 =
-* Released: December 19, 2018
-
-https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.1
-
-= 1.0 =
-* Released: December 6, 2018
-
-Initial release
-
-== Resources ==
-* normalize.css, © 2012-2018 Nicolas Gallagher and Jonathan Neal, MIT
-* Underscores, © 2012-2021 Automattic, Inc., GNU GPL v2 or later
-* Bundled block pattern images:
-	* Abstract Background by HD Wallpapers, CC0. https://stocksnap.io/photo/abstract-background-0SRRVNMKBX
-	* Abstract Waves by HD Wallpapers, CC0. https://stocksnap.io/photo/abstract-waves-0KREGLTZQ3
-	* Abstract Bokeh by HD Wallpapers, CC0. https://stocksnap.io/photo/abstract-bokeh-P4KVZBMQ6L
-	* Colorful Bokeh by HD Wallpapers, CC0. https://stocksnap.io/photo/colorful-bokeh-VN4G84GL8H
+Images
+Art by Berthe Morisot 1841-1895. Public domain.
+https://www.wikiart.org/en/berthe-morisot/playing-in-the-sand
+https://www.wikiart.org/en/berthe-morisot/roses-tremieres-hollyhocks-1884
+https://www.wikiart.org/en/berthe-morisot/young-woman-in-mauve
+https://www.wikiart.org/en/berthe-morisot/in-the-bois-de-boulogne
+https://www.wikiart.org/en/berthe-morisot/daffodils
+https://www.wikiart.org/en/berthe-morisot/self-portrait-1885
+https://www.wikiart.org/en/berthe-morisot/the-garden-at-bougival-1884
+https://www.wikiart.org/en/berthe-morisot/villa-with-orange-trees-nice
+https://www.wikiart.org/en/berthe-morisot/reading
