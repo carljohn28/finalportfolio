@@ -1,23 +1,15 @@
-<?php 	
+<?php
 /**
- * Template for displaying theme search
+ * template for displaying search forms
  *
- *
- *
- * @package Arrival
- * @copyright Copyright (C) 2018 WPoperation
- * @license  http://www.gnu.org/licenses/gpl-2.0.html
- * @author WPoperation <https://wpoperation.com/>
+ * @package mik
  */
+?>
 
- ?>
-
-<form method="get" class="search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
-	<label>
-		<span class="screen-reader-text"><?php esc_html_e('Search for:','arrival')?></span>
-		<input type="search" autocomplete="off" class="search-field" placeholder="<?php esc_attr_e( 'Type and hit enter ...', 'arrival' ); ?>" value="" name="s">
+<form role="search" method="get" class="search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+	<label for="s">
+		<span class="screen-reader-text"><?php echo esc_html_x( 'Search for:', 'label', 'mik' ); ?></span>
 	</label>
-	<input type="submit" class="search-submit" value="<?php esc_attr_e( 'Search', 'arrival' ); ?>">
-
+	<input type="search" class="search-field" placeholder="<?php echo esc_attr_x( 'Search &hellip;', 'placeholder', 'mik' ); ?>" value="<?php echo get_search_query(); ?>" name="s" />
+	<button type="submit" class="search-submit"><?php echo mik_get_svg( array( 'icon' => 'search' ) ); ?><span class="screen-reader-text"><?php echo esc_html_x( 'Search', 'submit button', 'mik' ); ?></span></button>
 </form>
-

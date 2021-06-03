@@ -1,88 +1,52 @@
 <?php
 /**
- * The main template file for displaying single posts
+ * The template for displaying all single posts
  *
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#single-post
  *
- * @link https://codex.wordpress.org/Template_Hierarchy
- *
- * @package Arrival
+ * @package mik
  */
 
-get_header(); ?>
+get_header();
 
-	<main id="primary" class="site-main single-post-wrapp">
+if ( mik_theme_option( 'header_alignment', 'left-align' ) == 'left-absolute' ) :
+	if ( ! has_post_thumbnail() ) {
+		if ( has_header_image() ) : ?>
+			<div class="featured-image inner-header-image">
+				<?php the_header_image_tag(); ?>
+			</div>
+		<?php endif;
+	}
+endif;
 
-	<?php
+if ( has_post_thumbnail() ) : ?>
+	<div class="featured-image inner-header-image">
+		<?php the_post_thumbnail( 'full', array( 'alt' => the_title_attribute( 'echo=0' ) ) ); ?>
+	</div>
+<?php endif; ?>
 
-	if ( have_posts() ) :
+<div class="single-template-wrapper wrapper page-section">
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main">
 
-		/**
-		 * Include the component stylesheet for the content.
-		 * This call runs only once on index and archive pages.
-		 * At some point, override functionality should be built in similar to the template part below.
-		 */
-		//wp_print_styles( array( 'arrival-content' ) ); // Note: If this was already done it will be skipped.
+		<?php
+		while ( have_posts() ) : the_post();
 
-		/* Display the appropriate header when required. */
-		
-
-		/* Start the Loop. */
-		while ( have_posts() ) :
-			the_post();
-
-			/*
-			 * Include the Post-Type-specific template for the content.
-			 * If you want to override this in a child theme, then include a file
-			 * called content-___.php (where ___ is the Post Type name) and that will be used instead.
-			 */
 			get_template_part( 'template-parts/content', 'single' );
 
-			
-		endwhile;
+			the_post_navigation();
 
-		
-		the_post_navigation(
-		array(
-			'prev_text' => '<div class="post-navigation-sub"><span>' . esc_html__( 'Previous:', 'arrival' ) . '</span></div>%title',
-			'next_text' => '<div class="post-navigation-sub"><span>' . esc_html__( 'Next:', 'arrival' ) . '</span></div>%title',
-			)
-		);
-arrival_post_tags();
-		// If comments are open or we have at least one comment, load up the comment template.
-		if ( comments_open() || get_comments_number() ) :
-			comments_template();
-		endif;
+			// If comments are open or we have at least one comment, load up the comment template.
+			if ( comments_open() || get_comments_number() ) :
+				comments_template();
+			endif;
 
-	else :
+		endwhile; // End of the loop.
+		?>
 
-		get_template_part( 'template-parts/content', 'none' );
-
-	endif;
-	?>
-
-	</main><!-- #primary -->
-
+		</main><!-- #main -->
+	</div><!-- #primary -->
+	<?php get_sidebar(); ?>
+</div>
 <?php
-
-$default              	= arrival_get_default_theme_options();
-$_single_post_sidebars 	= get_theme_mod('arrival_single_post_sidebars',$default['arrival_single_post_sidebars']);
-
-
-if( function_exists('arrival_mb_single_posts_sidebar')){
-	$meta_sidebar = arrival_mb_single_posts_sidebar();
-
-	if($meta_sidebar != 'default' ){
-		if( $meta_sidebar == 'leftsidebar' ){
-			get_sidebar('left');	
-		}else if( $meta_sidebar == 'rightsidebar' ){
-			get_sidebar('right');
-		}	
-	}elseif($_single_post_sidebars != 'no_sidebar' ){
-		get_sidebar($_single_post_sidebars);
-	}
-}else if( $_single_post_sidebars != 'no_sidebar' ){
-	get_sidebar($_single_post_sidebars);
-}
-
-
 get_footer();

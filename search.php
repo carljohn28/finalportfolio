@@ -1,64 +1,63 @@
 <?php
 /**
- * Template for displaying search page
+ * The template for displaying search results pages
  *
- * This is the most generic template file in a WordPress theme
- * and one of the two required files for a theme (the other being style.css).
- * It is used to display a page when nothing more specific matches a query.
- * E.g., it puts together the home page when no home.php file exists.
+ * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#search-result
  *
- * @link https://codex.wordpress.org/Template_Hierarchy
- *
- * @package arrival
+ * @package mik
  */
 
-get_header(); ?>
+get_header(); 
+$column = mik_theme_option( 'column_type' );
 
-	<main id="primary" class="site-main">
+if ( has_header_image() ) : ?>
+	<div class="featured-image inner-header-image">
+		<?php the_header_image_tag(); ?>
+	</div>
+<?php endif; ?>
 
-	<?php
+<div class="wrapper page-section">
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main">
+			<header class="page-header">
+				<h1 class="page-title"><?php
+					/* translators: %s: search query. */
+					printf( esc_html__( 'Search Results for: %s', 'mik' ), '<span>' . get_search_query() . '</span>' );
+				?></h1>
+			</header><!-- .page-header -->
+			<div class="blog-posts-wrapper grid <?php echo esc_attr( $column ) ?>">
+				<?php
+				if ( have_posts() ) : 
 
-	if ( have_posts() ) :
+					/* Start the Loop */
+					while ( have_posts() ) : the_post();
 
-		/**
-		 * Include the component stylesheet for the content.
-		 * This call runs only once on index and archive pages.
-		 * At some point, override functionality should be built in similar to the template part below.
-		 */
-		//wp_print_styles( array( 'arrival-content' ) ); // Note: If this was already done it will be skipped.
+						/*
+						 * Include the Post-Format-specific template for the content.
+						 * If you want to override this in a child theme, then include a file
+						 * called content-___.php (where ___ is the Post Format name) and that will be used instead.
+						 */
+						get_template_part( 'template-parts/content', get_post_format() );
 
-		/* Display the appropriate header when required. */
-		
+					endwhile;
 
-		/* Start the Loop. */
-		while ( have_posts() ) :
-			the_post();
+				else :
 
-			/*
-			 * Include the Post-Type-specific template for the content.
-			 * If you want to override this in a child theme, then include a file
-			 * called content-___.php (where ___ is the Post Type name) and that will be used instead.
-			 */
+					get_template_part( 'template-parts/content', 'none' );
 
-			get_template_part( 'template-parts/content', 'search' );
-			
-			
-
-		endwhile;
-
-		
-		if ( ! is_singular() ) :
-			arrival_numeric_posts_nav();
-		endif;
-
-	else :
-
-		get_template_part( 'template-parts/content', 'none' );
-
-	endif;
-	?>
-
-	</main><!-- #primary -->
-
+				endif; ?>
+			</div><!-- #blog-posts-wrapper -->
+			<?php  
+			/**
+			* Hook - mik_pagination_action.
+			*
+			* @hooked mik_pagination 
+			*/
+			do_action( 'mik_pagination_action' ); 
+			?>
+		</main><!-- #main -->
+	</div><!-- #primary -->
+	<?php get_sidebar(); ?>
+</div><!-- .wrapper -->
 <?php
 get_footer();
