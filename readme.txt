@@ -1,91 +1,135 @@
-﻿=== Ultra Companion – Companion plugin for WPoperation Themes ===
+=== Arrival ===
+
 Contributors: wpoperations
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Tested up to: 5.7
-Tags: woocommerce, magazine, blogs, ultra seven, companion, post view, shortcodes,social share, social icons, opstore, arrival
-Stable tag: 1.1.6
+Website: https://wpoperation.com/
+Email: support@wpoperation.com
+License: GNU General Public License, version 3 (GPLv3)
+License URI: http://www.gnu.org/licenses/gpl-3.0.txt
+Tags: translation-ready,right-sidebar,custom-menu, featured-images, threaded-comments,custom-logo, footer-widgets,blog,post-formats,sticky-post,theme-options,news,editor-style,custom-background,custom-header,left-sidebar,rtl-language-support,block-styles,wide-blocks
+Tested up to: 5.6
+Stable tag: 1.4.0
 
 == Description ==
-This is the companion plugin for WPoperation themes. This plugin will add extra features to the theme theme by adding social share, shortcodes, post views, metafields etc.
+
+Arrival is complete multipurpose WordPress theme. The theme can be used to create any type of website like corporate, business, portfolio, construction, charity, resturant, landing pages, education, fitness, gym, spa, travel, ecommerce, online stores etc. The theme is lightweight, fast and fully compatible with elementor and other major page builders. The theme comes with fully Gutenberg ready so you are free to edit and publish with new WordPress editor. The theme is a combination of power, freedom, and beauty which means there is no limit of anything you need to create a feature website with your own creative ideas.
 
 
-=== Features === 
+Arrival is a WordPress Theme, 
+Copyright (C) 2019, WPoperation
+Arrival is distributed under the terms of the GNU GPL
 
-Adds Extra features to the WPoperation Themes
-Translation Ready
-Lifetime Free support
-Constant updates
 
 == Installation ==
-1. Unzip ultra-companion.zip
-2. Upload all the files to the /wp-content/plugins/ultra-companion
-3. Activate the plugin through the 'Plugins' menu in WordPress.
 
-== Frequently Asked Questions ==
-= What does this plugin do? =
-This plugin will add extra features to the theme Ultra Seven by adding social share, shortcodes, post views etc.
-
-= How can I add post views? =
-Just install and activate this plugin and post view will be displayed automitacally.
+1. In your admin panel, go to Appearance > Themes and click the Add New button.
+2. Click Upload Theme and Choose File, then select the theme's .zip file. Click Install Now.
+3. Click Activate to use your new theme right away.
 
 
+-------------------------------------------------------
+== Screenshots ==
+-------------------------------------------------------
+
+
+All the images shown on the screenshot are designed by WPoperation
+
+Image License: GNU General Public License, version 3 (GPLv3) 
+
+
+
+-------------------------------------------------------
+Normalizing styles
+-------------------------------------------------------
+Normalizing styles have been helped along thanks to the fine work of.
+Nicolas Gallagher and Jonathan Neal http://necolas.github.com/normalize.css/
+
+
+
+-------------------------------------------------------
+ = IonIcons = 
+-------------------------------------------------------
+* IonIcons
+* License : Licensed under MIT
+* https://github.com/ionic-team/ionicons
+* https://github.com/ionic-team/ionicons/blob/master/LICENSE
+* https://ionicons.com/
+
+
+
+
+-------------------------------------------------------
+ = Jarallax = 
+-------------------------------------------------------
+* License: Licensed under MIT
+* https://github.com/nk-o/jarallax
+* https://github.com/nk-o/jarallax/blob/master/LICENSE
+
+
+-------------------------------------------------------
+ = OnePageNav = 
+-------------------------------------------------------
+* License: MIT and GPL licenses
+* http://github.com/davist11/jQuery-One-Page-Nav
+* https://github.com/davist11/jQuery-One-Page-Nav/blob/master/LICENSE
+
+
+
+-------------------------------------------------------
+= jQuery FitVids =
+-------------------------------------------------------
+* Copyright 2013, Chris Coyier
+* License: Licensed under MIT
+* https://github.com/davatron5000/FitVids.js/
+* https://opensource.org/licenses/MIT
+
+
+
+-------------------------------------------------------
+Slick Slider
+-------------------------------------------------------
+* Slick Slider
+* License: Licensed under MIT
+* https://github.com/kenwheeler/slick
+* https://github.com/kenwheeler/slick/blob/master/LICENSE
+
+
+-------------------------------------------------------
+Smooth Scroll For Websites
+-------------------------------------------------------
+* Smooth Scroll For Websites
+* License: Licensed under MIT
+* https://github.com/gblazex/smoothscroll-for-websites
+* https://github.com/gblazex/smoothscroll-for-websites/blob/master/LICENSE
+
+
+
+----------------------------------------
+
+Credits
+
+-----------------------------------------
+Some of the modules on this theme is inspird from some other resources here we have listed them all
+
+
+Kirki
+https://github.com/aristath/kirki
+https://opensource.org/licenses/MIT
+
+
+Jetpack
+https://github.com/Automattic/jetpack/blob/master/modules/lazy-images/lazy-images.php
+
+
+WP Rig
+https://github.com/wprig/wprig/
+https://github.com/wprig/wprig/blob/master/LICENSE
+
+
+Twenty Nineteen(WordPress Theme)
+https://github.com/WordPress/twentynineteen
+
+
+---------------------
 == Changelog ==
-= 1.1.6 =
-* COmpatibility check with WordPress 5.7
-
-= 1.1.5 =
-* Removed Printed Text from admin
-
-= 1.1.4 =
-* Fixed premium notice issue
-
-= 1.1.3 =
-* Added header background & menu link color for Arrival theme
-* Added option for inner padding
-
-= 1.1.2 =
-* Extra option added for breadcrumb title
-
-= 1.1.1 =
-* Fixed PHP warning issue for Gallery Meta
-* Fixed Pro Ad notice issue
-* Added Post Format Default Message
-
-= 1.1.0 =
-* Added Current Date Shortcode
-
-= 1.0.9 =
-* Slick style updated
-
-= 1.0.8 =
-* Compatible with child themes
-* Sale notice updated
-
-= 1.0.7 =
-*Minor Bugs Fixed
-
-= 1.0.6 =
-*Added butterbean framework for metabox options
-*Made compatible with all WPoperation themes
-
-= 1.0.5 =
-*Minor functions improvements
-
-= 1.0.4 =
-*Minor CSS & JS issue fixed
-
-= 1.0.3 =
-*Checked Compatibility for all free themes
-
-= 1.0.2 =
-*Added support for premium theme "Ultra Eleven"
-
-= 1.0.1 =
-*Minor bugs fixed
-
-= 1.0.0 =
-*Initial release
-
-
-  
+--------------------
+Please refer to changelot.txt file for changelot informations
