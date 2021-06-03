@@ -4,28 +4,30 @@
  *
  * @link https://codex.wordpress.org/Creating_an_Error_404_Page
  *
- * @package arrival
+ * @package WordPress
+ * @subpackage Twenty_Nineteen
+ * @since Twenty Nineteen 1.0
  */
 
-get_header(); ?>
-<div class="container">
-	<main id="primary" class="site-main">
+get_header();
+?>
 
-		<section class="error-404 not-found">
-			<header class="page-header">
-				<h1 class="page-title"><?php esc_html_e( 'Oops! That page can&rsquo;t be found.', 'arrival' ); ?></h1>
-			</header><!-- .page-header -->
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main">
 
-			<div class="page-content">
-				<p><?php esc_html_e( 'It looks like nothing was found at this location. Maybe searching can be useful?', 'arrival' ); ?></p>
+			<div class="error-404 not-found">
+				<header class="page-header">
+					<h1 class="page-title"><?php _e( 'Oops! That page can&rsquo;t be found.', 'twentynineteen' ); ?></h1>
+				</header><!-- .page-header -->
 
-				<?php get_search_form(); ?>
+				<div class="page-content">
+					<p><?php _e( 'It looks like nothing was found at this location. Maybe try a search?', 'twentynineteen' ); ?></p>
+					<?php get_search_form(); ?>
+				</div><!-- .page-content -->
+			</div><!-- .error-404 -->
 
-			
-			</div><!-- .page-content -->
-		</section><!-- .error-404 -->
+		</main><!-- #main -->
+	</div><!-- #primary -->
 
-	</main><!-- #primary -->
-</div>
 <?php
 get_footer();

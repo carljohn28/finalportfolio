@@ -4,49 +4,57 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-hierarchy/#single-post
  *
- * @package mik
+ * @package WordPress
+ * @subpackage Twenty_Nineteen
+ * @since Twenty Nineteen 1.0
  */
 
 get_header();
+?>
 
-if ( mik_theme_option( 'header_alignment', 'left-align' ) == 'left-absolute' ) :
-	if ( ! has_post_thumbnail() ) {
-		if ( has_header_image() ) : ?>
-			<div class="featured-image inner-header-image">
-				<?php the_header_image_tag(); ?>
-			</div>
-		<?php endif;
-	}
-endif;
-
-if ( has_post_thumbnail() ) : ?>
-	<div class="featured-image inner-header-image">
-		<?php the_post_thumbnail( 'full', array( 'alt' => the_title_attribute( 'echo=0' ) ) ); ?>
-	</div>
-<?php endif; ?>
-
-<div class="single-template-wrapper wrapper page-section">
 	<div id="primary" class="content-area">
 		<main id="main" class="site-main">
 
-		<?php
-		while ( have_posts() ) : the_post();
+			<?php
 
-			get_template_part( 'template-parts/content', 'single' );
+			// Start the Loop.
+			while ( have_posts() ) :
+				the_post();
 
-			the_post_navigation();
+				get_template_part( 'template-parts/content/content', 'single' );
 
-			// If comments are open or we have at least one comment, load up the comment template.
-			if ( comments_open() || get_comments_number() ) :
-				comments_template();
-			endif;
+				if ( is_singular( 'attachment' ) ) {
+					// Parent post navigation.
+					the_post_navigation(
+						array(
+							/* translators: %s: Parent post link. */
+							'prev_text' => sprintf( __( '<span class="meta-nav">Published in</span><span class="post-title">%s</span>', 'twentynineteen' ), '%title' ),
+						)
+					);
+				} elseif ( is_singular( 'post' ) ) {
+					// Previous/next post navigation.
+					the_post_navigation(
+						array(
+							'next_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Next Post', 'twentynineteen' ) . '</span> ' .
+								'<span class="screen-reader-text">' . __( 'Next post:', 'twentynineteen' ) . '</span> <br/>' .
+								'<span class="post-title">%title</span>',
+							'prev_text' => '<span class="meta-nav" aria-hidden="true">' . __( 'Previous Post', 'twentynineteen' ) . '</span> ' .
+								'<span class="screen-reader-text">' . __( 'Previous post:', 'twentynineteen' ) . '</span> <br/>' .
+								'<span class="post-title">%title</span>',
+						)
+					);
+				}
 
-		endwhile; // End of the loop.
-		?>
+				// If comments are open or we have at least one comment, load up the comment template.
+				if ( comments_open() || get_comments_number() ) {
+					comments_template();
+				}
+
+			endwhile; // End the loop.
+			?>
 
 		</main><!-- #main -->
 	</div><!-- #primary -->
-	<?php get_sidebar(); ?>
-</div>
+
 <?php
 get_footer();

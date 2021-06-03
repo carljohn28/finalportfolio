@@ -6,53 +6,48 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package arrival
+ * @package WordPress
+ * @subpackage Twenty_Nineteen
+ * @since Twenty Nineteen 1.0
  */
-
-?>
-<!doctype html>
-<html <?php language_attributes(); ?> class="no-js">
+?><!doctype html>
+<html <?php language_attributes(); ?>>
 <head>
-	<meta charset="<?php bloginfo( 'charset' ); ?>">
-	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-	<link rel="profile" href="https://gmpg.org/xfn/11">
-
-	<?php if ( ! arrival_is_amp() ) : ?>
-		<script>document.documentElement.classList.remove("no-js");</script>
-	<?php endif; ?>
-
+	<meta charset="<?php bloginfo( 'charset' ); ?>" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="profile" href="https://gmpg.org/xfn/11" />
 	<?php wp_head(); ?>
 </head>
 
 <body <?php body_class(); ?>>
+<?php wp_body_open(); ?>
+<div id="page" class="site">
+	<a class="skip-link screen-reader-text" href="#content"><?php _e( 'Skip to content', 'twentynineteen' ); ?></a>
 
-<?php 
-//wp_body_open hook from WordPress 5.2
-if ( function_exists( 'wp_body_open' ) ) {
-    wp_body_open();
-}else {
- 	do_action( 'wp_body_open' ); 
-}
+		<header id="masthead" class="<?php echo is_singular() && twentynineteen_can_show_post_thumbnail() ? 'site-header featured-image' : 'site-header'; ?>">
 
-$default 					= arrival_get_default_theme_options();
-$_page_header_layout 		= get_theme_mod('arrival_page_header_layout',$default['arrival_page_header_layout']);
-$_breadcrumb_enable 		= get_theme_mod('arrival_breadcrumb_enable',$default['arrival_breadcrumb_enable']);
+			<div class="site-branding-container">
+				<?php get_template_part( 'template-parts/header/site', 'branding' ); ?>
+			</div><!-- .site-branding-container -->
 
-?>
+			<?php if ( is_singular() && twentynineteen_can_show_post_thumbnail() ) : ?>
+				<div class="site-featured-image">
+					<?php
+						twentynineteen_post_thumbnail();
+						the_post();
+						$discussion = ! is_page() && twentynineteen_can_show_post_thumbnail() ? twentynineteen_get_discussion_data() : null;
 
-	<a class="skip-link screen-reader-text" href="#page"><?php esc_html_e( 'Skip to content', 'arrival' ); ?></a>
-		
-		<?php do_action('arrival_main_header_wrapp'); ?>
+						$classes = 'entry-header';
+					if ( ! empty( $discussion ) && absint( $discussion->responses ) > 0 ) {
+						$classes = 'entry-header has-discussion';
+					}
+					?>
+					<div class="<?php echo $classes; ?>">
+						<?php get_template_part( 'template-parts/header/entry', 'header' ); ?>
+					</div><!-- .entry-header -->
+					<?php rewind_posts(); ?>
+				</div>
+			<?php endif; ?>
+		</header><!-- #masthead -->
 
-<?php if( $_page_header_layout == 'layout-two' && $_breadcrumb_enable == 'yes' ){
-	do_action('arrival_breadcrumb_banner');
-}?>
-<?php 
-	$class = 'site';
-
-if( is_page_template('tpl-home.php') ){
-		$class = 'front-page';
-	}
-
- ?>
-<div id="page" class="<?php echo esc_attr($class)?>">
+	<div id="content" class="site-content">

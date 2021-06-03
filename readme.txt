@@ -1,128 +1,104 @@
-=== Mik ===
+=== Twenty Nineteen ===
+Contributors: wordpressdotorg
+Tags: one-column, flexible-header, accessibility-ready, custom-colors, custom-menu, custom-logo, editor-style, featured-images, footer-widgets, rtl-language-support, sticky-post, threaded-comments, translation-ready, block-patterns
+Requires at least: 4.9.6
+Tested up to: 5.7
+Stable tag: 2.0
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Contributors: sharkthemes
-Tags: translation-ready, custom-header, custom-background, theme-options, custom-menu, threaded-comments, featured-images, footer-widgets, left-sidebar, right-sidebar, full-width-template, two-columns, three-columns, four-columns, grid-layout, custom-logo, blog, portfolio, photography
-Requires PHP: 5.6
-Requires at least: 5.0
-Tested up to: 5.6.1
-Stable tag: 2.0.1
-License: GNU General Public License v3 or later
-License URI: http://www.gnu.org/licenses/gpl-3.0.html
+Our 2019 default theme is designed to show off the power of the block editor.
 
 == Description ==
+Our 2019 default theme is designed to show off the power of the block editor. It features custom styles for all the default blocks, and is built so that what you see in the editor looks like what you'll see on your website. Twenty Nineteen is designed to be adaptable to a wide range of websites, whether you’re running a photo blog, launching a new business, or supporting a non-profit. Featuring ample whitespace and modern sans-serif headlines paired with classic serif body text, it's built to be beautiful on all screen sizes.
 
-Mik is a clean, dynamic and masonry gutenberg ready WordPress blog theme with an elegant, carefully crafted design. This powerful, responsive masonry blog theme is ideal for your personal or magazine-style blog, whether your passion is travel, beauty, nature, photography, architecture, DIY… the list goes on! Mik will make your WordPress look beautiful in all devices. Mik theme has wide list of customizable features including front page customizable sections with customizer api, wide and boxed layout, unlimited theme color and many more options. It comes with cross-browser compatibility, mobile friendly design and responsive features.
+For more information about Twenty Nineteen please go to https://wordpress.org/support/article/twenty-nineteen/.
 
 == Installation ==
 
-1. In your admin panel, go to Appearance > Themes and click the Add New button.
-2. Click Upload Theme and Choose File, then select the theme's .zip file. Click Install Now.
-3. Click Activate to use your new theme right away.
+1. In your admin panel, go to Appearance -> Themes and click the 'Add New' button.
+2. Type in Twenty Nineteen in the search form and press the 'Enter' key on your keyboard.
+3. Click on the 'Activate' button to use your new theme right away.
+4. Go to https://wordpress.org/support/article/twenty-nineteen/ for a guide on how to customize this theme.
+5. Navigate to Appearance > Customize in your admin panel and customize to taste.
 
 == Copyright ==
 
-Mik WordPress Theme, Copyright 2020, Shark Themes
-Link: https://sharkthemes.com/downloads/mik/
+Twenty Nineteen WordPress Theme, Copyright 2018-2021 WordPress.org
+Twenty Nineteen is distributed under the terms of the GNU GPL
 
-HTML5-Shiv is Licensed under the MIT and GPL licenses
-    https://code.google.com/p/html5shiv/
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 2 of the License, or
+(at your option) any later version.
 
-Chosen Version - 1.4.2
-	Source: https://github.com/harvesthq/chosen
-	License: Copyright (c) 2011-2015 Harvest http://getharvest.com
-	license Url : https://github.com/harvesthq/chosen/blob/master/LICENSE.md
-
-Slick Version - 1.6.0
-	Source: http://github.com/kenwheeler/slick
-	License: The MIT License (MIT) copyright (c) 2013-2016
-	license Url : https://github.com/kenwheeler/slick/blob/master/LICENSE
-
-Isotope - 3.0.6
-	source : https://isotope.metafizzy.co
-	License: Isotope is licensed under GPLv3 for open source use
-	Licenser Url: https://isotope.metafizzy.co/license.html
-
-Packery - 2.0.1
-	source : https://packery.metafizzy.co/
-	License: Packery is licensed under GPLv3 for open source use
-	Licenser Url: https://packery.metafizzy.co/license.html
-
-
-== Frequently Asked Questions ==
-
-= Does this theme support any plugins? =
-
-Mik includes support for demo import in One Click Demo Import.
-
-== Images Screenshot ==
-Screenshot Image Copyright Jerry Kiesewetter
-License: Creative Commons CC0 license.
-License URI: https://stocksnap.io/license
-Source: https://pxhere.com/en/photo/25359
-Source: https://pxhere.com/en/photo/1253402
-Source: https://pxhere.com/en/photo/1711
-Source: https://pxhere.com/en/photo/151781
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
 
 == Changelog ==
 
-= 2.0.1 - Feb 12 2021 =
-* Minor design update
+= 2.0 =
+* Released: March 9, 2021
 
-= 2.0.0 - Feb 12 2021 =
-* Minor design update
+https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_2.0
 
-= 1.0.9 - Nov 26 2020 =
-* Minor design update
+= 1.9 =
+* Released: December 22, 2020
 
-= 1.0.8 - Nov 25 2020 =
-* Minor design update
-* Accessibility update
+https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.9
 
-= 1.0.7 - Nov 02 2020 =
-* Minor design update
+= 1.8 =
+* Released: December 8, 2020
 
-= 1.0.6 - Nov 02 2020 =
-* Minor accessibility update
+https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.8
 
-= 1.0.5 - Oct 07 2020 =
-* Minor Design update
+= 1.7 =
+* Released: August 11, 2020
 
-= 1.0.4 - Oct 05 2020 =
-* Minor Design update
+https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.7
 
-= 1.0.3 - Sep 28 2020 =
-* Minor code update
-* Minor accessibility update
+= 1.6 =
+* Released: June 10, 2020
 
-= 1.0.2 - Sep 23 2020 =
-* Minor Design update
+https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.6
 
-= 1.0.1 - July 30 2020 =
-* Minor design update
+= 1.5 =
+* Released: March 31, 2020
 
-= 1.0.0 - July 07 2020 =
-* Initial release
+https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.5
 
-== Upgrade Notice ==
+= 1.4 =
+* Released: May 7, 2019
 
-= 1.0.1 =
-* Minor design update
+https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.4
 
-= 1.0.0 =
-* Initial release
+= 1.3 =
+* Released: February 21, 2019
 
-== Credits ==
+https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.3
 
-* Based on Underscores https://underscores.me/, (C) 2012-2017 Automattic, Inc., [GPLv2 or later](https://www.gnu.org/licenses/gpl-2.0.html)
+= 1.2 =
+* Released: January 9, 2019
 
-* normalize.css https://necolas.github.io/normalize.css/, (C) 2012-2016 Nicolas Gallagher and Jonathan Neal, [MIT](https://opensource.org/licenses/MIT)
+https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.2
 
-* class-tgm-plugin-activation.php https://github.com/TGMPA/TGM-Plugin-Activation [GNU General Public License v2.0]
+= 1.1 =
+* Released: December 19, 2018
 
-* SVG Icons function https://github.com/WordPress/twentyseventeen (C) 2016 WordPress.org, [GNU GPL, version 2 or later ( http://www.gnu.org/licenses/old-licenses/gpl-2.0.html )
+https://codex.wordpress.org/Twenty_Nineteen_Theme_Changelog#Version_1.1
 
-* Upsell Customizer option https://github.com/WPTRT/customize-section-button GNU General Public License v2.0 ( https://github.com/WPTRT/customize-section-button/blob/master/license.md )
+= 1.0 =
+* Released: December 6, 2018
 
-* Radio-Image control https://github.com/reduxframework/kirki/ [MIT](https://opensource.org/licenses/MIT)
+Initial release
 
-* Multi input custom control https://github.com/dingo-d/wordpress-theme-customizer-extra-custom-controls GNU General Public License v3.0 https://www.gnu.org/licenses/gpl-3.0.txt
+== Resources ==
+* normalize.css, © 2012-2018 Nicolas Gallagher and Jonathan Neal, MIT
+* Underscores, © 2012-2021 Automattic, Inc., GNU GPL v2 or later
+* Bundled block pattern images:
+	* Abstract Background by HD Wallpapers, CC0. https://stocksnap.io/photo/abstract-background-0SRRVNMKBX
+	* Abstract Waves by HD Wallpapers, CC0. https://stocksnap.io/photo/abstract-waves-0KREGLTZQ3
+	* Abstract Bokeh by HD Wallpapers, CC0. https://stocksnap.io/photo/abstract-bokeh-P4KVZBMQ6L
+	* Colorful Bokeh by HD Wallpapers, CC0. https://stocksnap.io/photo/colorful-bokeh-VN4G84GL8H
