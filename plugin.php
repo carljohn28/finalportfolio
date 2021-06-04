@@ -1,775 +1,935 @@
 <?php
-namespace Elementor;
+/**
+ * The plugin API is located in this file, which allows for creating actions
+ * and filters and hooking functions, and methods. The functions or methods will
+ * then be run when the action or filter is called.
+ *
+ * The API callback examples reference functions, but can be methods of classes.
+ * To hook methods, you'll need to pass an array one of two ways.
+ *
+ * Any of the syntaxes explained in the PHP documentation for the
+ * {@link https://www.php.net/manual/en/language.pseudo-types.php#language.types.callback 'callback'}
+ * type are valid.
+ *
+ * Also see the {@link https://developer.wordpress.org/plugins/ Plugin API} for
+ * more information and examples on how to use a lot of these functions.
+ *
+ * This file should have no external dependencies.
+ *
+ * @package WordPress
+ * @subpackage Plugin
+ * @since 1.5.0
+ */
 
-use Elementor\Core\Wp_Api;
-use Elementor\Core\Admin\Admin;
-use Elementor\Core\Breakpoints\Manager as Breakpoints_Manager;
-use Elementor\Core\Common\Modules\Ajax\Module as Ajax;
-use Elementor\Core\Common\App as CommonApp;
-use Elementor\Core\Debug\Inspector;
-use Elementor\Core\Documents_Manager;
-use Elementor\Core\Experiments\Manager as Experiments_Manager;
-use Elementor\Core\Kits\Manager as Kits_Manager;
-use Elementor\Core\Editor\Editor;
-use Elementor\Core\Files\Manager as Files_Manager;
-use Elementor\Core\Files\Assets\Manager as Assets_Manager;
-use Elementor\Core\Modules_Manager;
-use Elementor\Core\Schemes\Manager as Schemes_Manager;
-use Elementor\Core\Settings\Manager as Settings_Manager;
-use Elementor\Core\Settings\Page\Manager as Page_Settings_Manager;
-use Elementor\Core\Upgrade\Elementor_3_Re_Migrate_Globals;
-use Elementor\Modules\History\Revisions_Manager;
-use Elementor\Core\DynamicTags\Manager as Dynamic_Tags_Manager;
-use Elementor\Core\Logger\Manager as Log_Manager;
-use Elementor\Modules\System_Info\Module as System_Info_Module;
-use Elementor\Data\Manager as Data_Manager;
-use Elementor\Core\Common\Modules\DevTools\Module as Dev_Tools;
+// Initialize the filter globals.
+require __DIR__ . '/class-wp-hook.php';
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+/** @var WP_Hook[] $wp_filter */
+global $wp_filter;
+
+/** @var int[] $wp_actions */
+global $wp_actions;
+
+/** @var string[] $wp_current_filter */
+global $wp_current_filter;
+
+if ( $wp_filter ) {
+	$wp_filter = WP_Hook::build_preinitialized_hooks( $wp_filter );
+} else {
+	$wp_filter = array();
+}
+
+if ( ! isset( $wp_actions ) ) {
+	$wp_actions = array();
+}
+
+if ( ! isset( $wp_current_filter ) ) {
+	$wp_current_filter = array();
 }
 
 /**
- * Elementor plugin.
+ * Hook a function or method to a specific filter action.
  *
- * The main plugin handler class is responsible for initializing Elementor. The
- * class registers and all the components required to run the plugin.
+ * WordPress offers filter hooks to allow plugins to modify
+ * various types of internal data at runtime.
  *
- * @since 1.0.0
+ * A plugin can modify data by binding a callback to a filter hook. When the filter
+ * is later applied, each bound callback is run in order of priority, and given
+ * the opportunity to modify a value by returning a new value.
+ *
+ * The following example shows how a callback function is bound to a filter hook.
+ *
+ * Note that `$example` is passed to the callback, (maybe) modified, then returned:
+ *
+ *     function example_callback( $example ) {
+ *         // Maybe modify $example in some way.
+ *         return $example;
+ *     }
+ *     add_filter( 'example_filter', 'example_callback' );
+ *
+ * Bound callbacks can accept from none to the total number of arguments passed as parameters
+ * in the corresponding apply_filters() call.
+ *
+ * In other words, if an apply_filters() call passes four total arguments, callbacks bound to
+ * it can accept none (the same as 1) of the arguments or up to four. The important part is that
+ * the `$accepted_args` value must reflect the number of arguments the bound callback *actually*
+ * opted to accept. If no arguments were accepted by the callback that is considered to be the
+ * same as accepting 1 argument. For example:
+ *
+ *     // Filter call.
+ *     $value = apply_filters( 'hook', $value, $arg2, $arg3 );
+ *
+ *     // Accepting zero/one arguments.
+ *     function example_callback() {
+ *         ...
+ *         return 'some value';
+ *     }
+ *     add_filter( 'hook', 'example_callback' ); // Where $priority is default 10, $accepted_args is default 1.
+ *
+ *     // Accepting two arguments (three possible).
+ *     function example_callback( $value, $arg2 ) {
+ *         ...
+ *         return $maybe_modified_value;
+ *     }
+ *     add_filter( 'hook', 'example_callback', 10, 2 ); // Where $priority is 10, $accepted_args is 2.
+ *
+ * *Note:* The function will return true whether or not the callback is valid.
+ * It is up to you to take care. This is done for optimization purposes, so
+ * everything is as quick as possible.
+ *
+ * @since 0.71
+ *
+ * @global WP_Hook[] $wp_filter A multidimensional array of all hooks and the callbacks hooked to them.
+ *
+ * @param string   $tag             The name of the filter to hook the $function_to_add callback to.
+ * @param callable $function_to_add The callback to be run when the filter is applied.
+ * @param int      $priority        Optional. Used to specify the order in which the functions
+ *                                  associated with a particular action are executed.
+ *                                  Lower numbers correspond with earlier execution,
+ *                                  and functions with the same priority are executed
+ *                                  in the order in which they were added to the action. Default 10.
+ * @param int      $accepted_args   Optional. The number of arguments the function accepts. Default 1.
+ * @return true
  */
-class Plugin {
-
-	/**
-	 * Instance.
-	 *
-	 * Holds the plugin instance.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 * @static
-	 *
-	 * @var Plugin
-	 */
-	public static $instance = null;
-
-	/**
-	 * Database.
-	 *
-	 * Holds the plugin database.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var DB
-	 */
-	public $db;
-
-	/**
-	 * Ajax Manager.
-	 *
-	 * Holds the plugin ajax manager.
-	 *
-	 * @since 1.9.0
-	 * @deprecated 2.3.0 Use `Plugin::$instance->common->get_component( 'ajax' )` instead
-	 * @access public
-	 *
-	 * @var Ajax
-	 */
-	public $ajax;
-
-	/**
-	 * Controls manager.
-	 *
-	 * Holds the plugin controls manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Controls_Manager
-	 */
-	public $controls_manager;
-
-	/**
-	 * Documents manager.
-	 *
-	 * Holds the documents manager.
-	 *
-	 * @since 2.0.0
-	 * @access public
-	 *
-	 * @var Documents_Manager
-	 */
-	public $documents;
-
-	/**
-	 * Schemes manager.
-	 *
-	 * Holds the plugin schemes manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Schemes_Manager
-	 */
-	public $schemes_manager;
-
-	/**
-	 * Elements manager.
-	 *
-	 * Holds the plugin elements manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Elements_Manager
-	 */
-	public $elements_manager;
-
-	/**
-	 * Widgets manager.
-	 *
-	 * Holds the plugin widgets manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Widgets_Manager
-	 */
-	public $widgets_manager;
-
-	/**
-	 * Revisions manager.
-	 *
-	 * Holds the plugin revisions manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Revisions_Manager
-	 */
-	public $revisions_manager;
-
-	/**
-	 * Images manager.
-	 *
-	 * Holds the plugin images manager.
-	 *
-	 * @since 2.9.0
-	 * @access public
-	 *
-	 * @var Images_Manager
-	 */
-	public $images_manager;
-
-	/**
-	 * Maintenance mode.
-	 *
-	 * Holds the plugin maintenance mode.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Maintenance_Mode
-	 */
-	public $maintenance_mode;
-
-	/**
-	 * Page settings manager.
-	 *
-	 * Holds the page settings manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Page_Settings_Manager
-	 */
-	public $page_settings_manager;
-
-	/**
-	 * Dynamic tags manager.
-	 *
-	 * Holds the dynamic tags manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Dynamic_Tags_Manager
-	 */
-	public $dynamic_tags;
-
-	/**
-	 * Settings.
-	 *
-	 * Holds the plugin settings.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Settings
-	 */
-	public $settings;
-
-	/**
-	 * Role Manager.
-	 *
-	 * Holds the plugin Role Manager
-	 *
-	 * @since 2.0.0
-	 * @access public
-	 *
-	 * @var \Elementor\Core\RoleManager\Role_Manager
-	 */
-	public $role_manager;
-
-	/**
-	 * Admin.
-	 *
-	 * Holds the plugin admin.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Admin
-	 */
-	public $admin;
-
-	/**
-	 * Tools.
-	 *
-	 * Holds the plugin tools.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Tools
-	 */
-	public $tools;
-
-	/**
-	 * Preview.
-	 *
-	 * Holds the plugin preview.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Preview
-	 */
-	public $preview;
-
-	/**
-	 * Editor.
-	 *
-	 * Holds the plugin editor.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Editor
-	 */
-	public $editor;
-
-	/**
-	 * Frontend.
-	 *
-	 * Holds the plugin frontend.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Frontend
-	 */
-	public $frontend;
-
-	/**
-	 * Heartbeat.
-	 *
-	 * Holds the plugin heartbeat.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Heartbeat
-	 */
-	public $heartbeat;
-
-	/**
-	 * System info.
-	 *
-	 * Holds the system info data.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var System_Info\Main
-	 */
-	public $system_info;
-
-	/**
-	 * Template library manager.
-	 *
-	 * Holds the template library manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var TemplateLibrary\Manager
-	 */
-	public $templates_manager;
-
-	/**
-	 * Skins manager.
-	 *
-	 * Holds the skins manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Skins_Manager
-	 */
-	public $skins_manager;
-
-	/**
-	 * Files Manager.
-	 *
-	 * Holds the files manager.
-	 *
-	 * @since 2.1.0
-	 * @access public
-	 *
-	 * @var Files_Manager
-	 */
-	public $files_manager;
-
-	/**
-	 * Assets Manager.
-	 *
-	 * Holds the Assets manager.
-	 *
-	 * @since 2.6.0
-	 * @access public
-	 *
-	 * @var Assets_Manager
-	 */
-	public $assets_manager;
-
-	/**
-	 * Files Manager.
-	 *
-	 * Holds the files manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 * @deprecated 2.1.0 Use `Plugin::$files_manager` instead
-	 *
-	 * @var Files_Manager
-	 */
-	private $posts_css_manager;
-
-	/**
-	 * WordPress widgets manager.
-	 *
-	 * Holds the WordPress widgets manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var WordPress_Widgets_Manager
-	 */
-	public $wordpress_widgets_manager;
-
-	/**
-	 * Modules manager.
-	 *
-	 * Holds the modules manager.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Modules_Manager
-	 */
-	public $modules_manager;
-
-	/**
-	 * Beta testers.
-	 *
-	 * Holds the plugin beta testers.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @var Beta_Testers
-	 */
-	public $beta_testers;
-
-	/**
-	 * @var Inspector
-	 * @deprecated 2.1.2 Use $inspector.
-	 */
-	public $debugger;
-
-	/**
-	 * @var Inspector
-	 */
-	public $inspector;
-
-	/**
-	 * @var CommonApp
-	 */
-	public $common;
-
-	/**
-	 * @var Log_Manager
-	 */
-	public $logger;
-
-	/**
-	 * @var Dev_Tools
-	 */
-	private $dev_tools;
-
-	/**
-	 * @var Core\Upgrade\Manager
-	 */
-	public $upgrade;
-
-	/**
-	 * @var Core\Kits\Manager
-	 */
-	public $kits_manager;
-
-	/**
-	 * @var \Core\Data\Manager
-	 */
-	public $data_manager;
-
-	public $legacy_mode;
-
-	/**
-	 * @var Core\App\App
-	 */
-	public $app;
-
-	/**
-	 * @var Wp_Api
-	 */
-	public $wp;
-
-	/**
-	 * @var Experiments_Manager
-	 */
-	public $experiments;
-
-	/**
-	 * @var Breakpoints_Manager
-	 */
-	public $breakpoints;
-
-	/**
-	 * Clone.
-	 *
-	 * Disable class cloning and throw an error on object clone.
-	 *
-	 * The whole idea of the singleton design pattern is that there is a single
-	 * object. Therefore, we don't want the object to be cloned.
-	 *
-	 * @access public
-	 * @since 1.0.0
-	 */
-	public function __clone() {
-		// Cloning instances of the class is forbidden.
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Something went wrong.', 'elementor' ), '1.0.0' );
+function add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
+	global $wp_filter;
+	if ( ! isset( $wp_filter[ $tag ] ) ) {
+		$wp_filter[ $tag ] = new WP_Hook();
 	}
+	$wp_filter[ $tag ]->add_filter( $tag, $function_to_add, $priority, $accepted_args );
+	return true;
+}
 
-	/**
-	 * Wakeup.
-	 *
-	 * Disable unserializing of the class.
-	 *
-	 * @access public
-	 * @since 1.0.0
-	 */
-	public function __wakeup() {
-		// Unserializing instances of the class is forbidden.
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Something went wrong.', 'elementor' ), '1.0.0' );
-	}
+/**
+ * Checks if any filter has been registered for a hook.
+ *
+ * When using the `$function_to_check` argument, this function may return a non-boolean value
+ * that evaluates to false (e.g. 0), so use the `===` operator for testing the return value.
+ *
+ * @since 2.5.0
+ *
+ * @global WP_Hook[] $wp_filter Stores all of the filters and actions.
+ *
+ * @param string         $tag               The name of the filter hook.
+ * @param callable|false $function_to_check Optional. The callback to check for. Default false.
+ * @return bool|int If `$function_to_check` is omitted, returns boolean for whether the hook has
+ *                  anything registered. When checking a specific function, the priority of that
+ *                  hook is returned, or false if the function is not attached.
+ */
+function has_filter( $tag, $function_to_check = false ) {
+	global $wp_filter;
 
-	/**
-	 * Instance.
-	 *
-	 * Ensures only one instance of the plugin class is loaded or can be loaded.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 * @static
-	 *
-	 * @return Plugin An instance of the class.
-	 */
-	public static function instance() {
-		if ( is_null( self::$instance ) ) {
-			self::$instance = new self();
-
-			/**
-			 * Elementor loaded.
-			 *
-			 * Fires when Elementor was fully loaded and instantiated.
-			 *
-			 * @since 1.0.0
-			 */
-			do_action( 'elementor/loaded' );
-		}
-
-		return self::$instance;
-	}
-
-	/**
-	 * Init.
-	 *
-	 * Initialize Elementor Plugin. Register Elementor support for all the
-	 * supported post types and initialize Elementor components.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 */
-	public function init() {
-		$this->add_cpt_support();
-
-		$this->init_components();
-
-		/**
-		 * Elementor init.
-		 *
-		 * Fires on Elementor init, after Elementor has finished loading but
-		 * before any headers are sent.
-		 *
-		 * @since 1.0.0
-		 */
-		do_action( 'elementor/init' );
-	}
-
-	/**
-	 * Get install time.
-	 *
-	 * Retrieve the time when Elementor was installed.
-	 *
-	 * @since 2.6.0
-	 * @access public
-	 * @static
-	 *
-	 * @return int Unix timestamp when Elementor was installed.
-	 */
-	public function get_install_time() {
-		$installed_time = get_option( '_elementor_installed_time' );
-
-		if ( ! $installed_time ) {
-			$installed_time = time();
-
-			update_option( '_elementor_installed_time', $installed_time );
-		}
-
-		return $installed_time;
-	}
-
-	/**
-	 * @since 2.3.0
-	 * @access public
-	 */
-	public function on_rest_api_init() {
-		// On admin/frontend sometimes the rest API is initialized after the common is initialized.
-		if ( ! $this->common ) {
-			$this->init_common();
-		}
-	}
-
-	/**
-	 * Init components.
-	 *
-	 * Initialize Elementor components. Register actions, run setting manager,
-	 * initialize all the components that run elementor, and if in admin page
-	 * initialize admin components.
-	 *
-	 * @since 1.0.0
-	 * @access private
-	 */
-	private function init_components() {
-		$this->experiments = new Experiments_Manager();
-		$this->breakpoints = new Breakpoints_Manager();
-		$this->inspector = new Inspector();
-		$this->debugger = $this->inspector;
-
-		Settings_Manager::run();
-
-		$this->db = new DB();
-		$this->controls_manager = new Controls_Manager();
-		$this->documents = new Documents_Manager();
-		$this->kits_manager = new Kits_Manager();
-		$this->schemes_manager = new Schemes_Manager();
-		$this->elements_manager = new Elements_Manager();
-		$this->widgets_manager = new Widgets_Manager();
-		$this->skins_manager = new Skins_Manager();
-		$this->files_manager = new Files_Manager();
-		$this->assets_manager = new Assets_Manager();
-		$this->icons_manager = new Icons_Manager();
-		$this->settings = new Settings();
-		$this->tools = new Tools();
-		$this->editor = new Editor();
-		$this->preview = new Preview();
-		$this->frontend = new Frontend();
-		$this->maintenance_mode = new Maintenance_Mode();
-		$this->dynamic_tags = new Dynamic_Tags_Manager();
-		$this->modules_manager = new Modules_Manager();
-		$this->templates_manager = new TemplateLibrary\Manager();
-		$this->role_manager = new Core\RoleManager\Role_Manager();
-		$this->system_info = new System_Info_Module();
-		$this->revisions_manager = new Revisions_Manager();
-		$this->images_manager = new Images_Manager();
-		$this->wp = new Wp_Api();
-
-		User::init();
-		Api::init();
-		Tracker::init();
-
-		$this->upgrade = new Core\Upgrade\Manager();
-
-		$this->app = new Core\App\App();
-
-		if ( is_admin() ) {
-			$this->heartbeat = new Heartbeat();
-			$this->wordpress_widgets_manager = new WordPress_Widgets_Manager();
-			$this->admin = new Admin();
-			$this->beta_testers = new Beta_Testers();
-			new Elementor_3_Re_Migrate_Globals();
-		}
-	}
-
-	/**
-	 * @since 2.3.0
-	 * @access public
-	 */
-	public function init_common() {
-		$this->common = new CommonApp();
-
-		$this->common->init_components();
-
-		$this->ajax = $this->common->get_component( 'ajax' );
-	}
-
-	/**
-	 * Get Legacy Mode
-	 *
-	 * @since 3.0.0
-	 * @deprecated 3.1.0 Use `Plugin::$instance->experiments->is_feature_active()` instead
-	 *
-	 * @param string $mode_name Optional. Default is null
-	 *
-	 * @return bool|bool[]
-	 */
-	public function get_legacy_mode( $mode_name = null ) {
-		self::$instance->modules_manager->get_modules( 'dev-tools' )->deprecation
-			->deprecated_function( __METHOD__, '3.1.0', 'Plugin::$instance->experiments->is_feature_active()' );
-
-		$legacy_mode = [
-			'elementWrappers' => ! self::$instance->experiments->is_feature_active( 'e_dom_optimization' ),
-		];
-
-		if ( ! $mode_name ) {
-			return $legacy_mode;
-		}
-
-		if ( isset( $legacy_mode[ $mode_name ] ) ) {
-			return $legacy_mode[ $mode_name ];
-		}
-
-		// If there is no legacy mode with the given mode name;
+	if ( ! isset( $wp_filter[ $tag ] ) ) {
 		return false;
 	}
 
-	/**
-	 * Add custom post type support.
-	 *
-	 * Register Elementor support for all the supported post types defined by
-	 * the user in the admin screen and saved as `elementor_cpt_support` option
-	 * in WordPress `$wpdb->options` table.
-	 *
-	 * If no custom post type selected, usually in new installs, this method
-	 * will return the two default post types: `page` and `post`.
-	 *
-	 * @since 1.0.0
-	 * @access private
-	 */
-	private function add_cpt_support() {
-		$cpt_support = get_option( 'elementor_cpt_support', [ 'page', 'post' ] );
+	return $wp_filter[ $tag ]->has_filter( $tag, $function_to_check );
+}
 
-		foreach ( $cpt_support as $cpt_slug ) {
-			add_post_type_support( $cpt_slug, 'elementor' );
+/**
+ * Calls the callback functions that have been added to a filter hook.
+ *
+ * The callback functions attached to the filter hook are invoked by calling
+ * this function. This function can be used to create a new filter hook by
+ * simply calling this function with the name of the new hook specified using
+ * the `$tag` parameter.
+ *
+ * The function also allows for multiple additional arguments to be passed to hooks.
+ *
+ * Example usage:
+ *
+ *     // The filter callback function.
+ *     function example_callback( $string, $arg1, $arg2 ) {
+ *         // (maybe) modify $string.
+ *         return $string;
+ *     }
+ *     add_filter( 'example_filter', 'example_callback', 10, 3 );
+ *
+ *     /*
+ *      * Apply the filters by calling the 'example_callback()' function
+ *      * that's hooked onto `example_filter` above.
+ *      *
+ *      * - 'example_filter' is the filter hook.
+ *      * - 'filter me' is the value being filtered.
+ *      * - $arg1 and $arg2 are the additional arguments passed to the callback.
+ *     $value = apply_filters( 'example_filter', 'filter me', $arg1, $arg2 );
+ *
+ * @since 0.71
+ *
+ * @global WP_Hook[] $wp_filter         Stores all of the filters and actions.
+ * @global string[]  $wp_current_filter Stores the list of current filters with the current one last.
+ *
+ * @param string $tag     The name of the filter hook.
+ * @param mixed  $value   The value to filter.
+ * @param mixed  ...$args Additional parameters to pass to the callback functions.
+ * @return mixed The filtered value after all hooked functions are applied to it.
+ */
+function apply_filters( $tag, $value ) {
+	global $wp_filter, $wp_current_filter;
+
+	$args = func_get_args();
+
+	// Do 'all' actions first.
+	if ( isset( $wp_filter['all'] ) ) {
+		$wp_current_filter[] = $tag;
+		_wp_call_all_hook( $args );
+	}
+
+	if ( ! isset( $wp_filter[ $tag ] ) ) {
+		if ( isset( $wp_filter['all'] ) ) {
+			array_pop( $wp_current_filter );
+		}
+		return $value;
+	}
+
+	if ( ! isset( $wp_filter['all'] ) ) {
+		$wp_current_filter[] = $tag;
+	}
+
+	// Don't pass the tag name to WP_Hook.
+	array_shift( $args );
+
+	$filtered = $wp_filter[ $tag ]->apply_filters( $value, $args );
+
+	array_pop( $wp_current_filter );
+
+	return $filtered;
+}
+
+/**
+ * Calls the callback functions that have been added to a filter hook, specifying arguments in an array.
+ *
+ * @since 3.0.0
+ *
+ * @see apply_filters() This function is identical, but the arguments passed to the
+ * functions hooked to `$tag` are supplied using an array.
+ *
+ * @global WP_Hook[] $wp_filter         Stores all of the filters and actions.
+ * @global string[]  $wp_current_filter Stores the list of current filters with the current one last.
+ *
+ * @param string $tag  The name of the filter hook.
+ * @param array  $args The arguments supplied to the functions hooked to $tag.
+ * @return mixed The filtered value after all hooked functions are applied to it.
+ */
+function apply_filters_ref_array( $tag, $args ) {
+	global $wp_filter, $wp_current_filter;
+
+	// Do 'all' actions first.
+	if ( isset( $wp_filter['all'] ) ) {
+		$wp_current_filter[] = $tag;
+		$all_args            = func_get_args(); // phpcs:ignore PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.NeedsInspection
+		_wp_call_all_hook( $all_args );
+	}
+
+	if ( ! isset( $wp_filter[ $tag ] ) ) {
+		if ( isset( $wp_filter['all'] ) ) {
+			array_pop( $wp_current_filter );
+		}
+		return $args[0];
+	}
+
+	if ( ! isset( $wp_filter['all'] ) ) {
+		$wp_current_filter[] = $tag;
+	}
+
+	$filtered = $wp_filter[ $tag ]->apply_filters( $args[0], $args );
+
+	array_pop( $wp_current_filter );
+
+	return $filtered;
+}
+
+/**
+ * Removes a function from a specified filter hook.
+ *
+ * This function removes a function attached to a specified filter hook. This
+ * method can be used to remove default functions attached to a specific filter
+ * hook and possibly replace them with a substitute.
+ *
+ * To remove a hook, the $function_to_remove and $priority arguments must match
+ * when the hook was added. This goes for both filters and actions. No warning
+ * will be given on removal failure.
+ *
+ * @since 1.2.0
+ *
+ * @global WP_Hook[] $wp_filter Stores all of the filters and actions.
+ *
+ * @param string   $tag                The filter hook to which the function to be removed is hooked.
+ * @param callable $function_to_remove The name of the function which should be removed.
+ * @param int      $priority           Optional. The priority of the function. Default 10.
+ * @return bool    Whether the function existed before it was removed.
+ */
+function remove_filter( $tag, $function_to_remove, $priority = 10 ) {
+	global $wp_filter;
+
+	$r = false;
+	if ( isset( $wp_filter[ $tag ] ) ) {
+		$r = $wp_filter[ $tag ]->remove_filter( $tag, $function_to_remove, $priority );
+		if ( ! $wp_filter[ $tag ]->callbacks ) {
+			unset( $wp_filter[ $tag ] );
 		}
 	}
 
-	/**
-	 * Register autoloader.
-	 *
-	 * Elementor autoloader loads all the classes needed to run the plugin.
-	 *
-	 * @since 1.6.0
-	 * @access private
-	 */
-	private function register_autoloader() {
-		require_once ELEMENTOR_PATH . '/includes/autoloader.php';
+	return $r;
+}
 
-		Autoloader::run();
-	}
+/**
+ * Remove all of the hooks from a filter.
+ *
+ * @since 2.7.0
+ *
+ * @global WP_Hook[] $wp_filter Stores all of the filters and actions.
+ *
+ * @param string    $tag      The filter to remove hooks from.
+ * @param int|false $priority Optional. The priority number to remove. Default false.
+ * @return true True when finished.
+ */
+function remove_all_filters( $tag, $priority = false ) {
+	global $wp_filter;
 
-	/**
-	 * Plugin Magic Getter
-	 *
-	 * @since 3.1.0
-	 * @access public
-	 *
-	 * @param $property
-	 * @return mixed
-	 * @throws \Exception
-	 */
-	public function __get( $property ) {
-		if ( 'posts_css_manager' === $property ) {
-			self::$instance->modules_manager->get_modules( 'dev-tools' )->deprecation->deprecated_argument( 'Plugin::$instance->posts_css_manager', '2.7.0', 'Plugin::$instance->files_manager' );
-
-			return $this->files_manager;
+	if ( isset( $wp_filter[ $tag ] ) ) {
+		$wp_filter[ $tag ]->remove_all_filters( $priority );
+		if ( ! $wp_filter[ $tag ]->has_filters() ) {
+			unset( $wp_filter[ $tag ] );
 		}
+	}
 
-		if ( property_exists( $this, $property ) ) {
-			throw new \Exception( 'Cannot access private property' );
+	return true;
+}
+
+/**
+ * Retrieve the name of the current filter or action.
+ *
+ * @since 2.5.0
+ *
+ * @global string[] $wp_current_filter Stores the list of current filters with the current one last
+ *
+ * @return string Hook name of the current filter or action.
+ */
+function current_filter() {
+	global $wp_current_filter;
+	return end( $wp_current_filter );
+}
+
+/**
+ * Retrieve the name of the current action.
+ *
+ * @since 3.9.0
+ *
+ * @return string Hook name of the current action.
+ */
+function current_action() {
+	return current_filter();
+}
+
+/**
+ * Retrieve the name of a filter currently being processed.
+ *
+ * The function current_filter() only returns the most recent filter or action
+ * being executed. did_action() returns true once the action is initially
+ * processed.
+ *
+ * This function allows detection for any filter currently being
+ * executed (despite not being the most recent filter to fire, in the case of
+ * hooks called from hook callbacks) to be verified.
+ *
+ * @since 3.9.0
+ *
+ * @see current_filter()
+ * @see did_action()
+ * @global string[] $wp_current_filter Current filter.
+ *
+ * @param null|string $filter Optional. Filter to check. Defaults to null, which
+ *                            checks if any filter is currently being run.
+ * @return bool Whether the filter is currently in the stack.
+ */
+function doing_filter( $filter = null ) {
+	global $wp_current_filter;
+
+	if ( null === $filter ) {
+		return ! empty( $wp_current_filter );
+	}
+
+	return in_array( $filter, $wp_current_filter, true );
+}
+
+/**
+ * Retrieve the name of an action currently being processed.
+ *
+ * @since 3.9.0
+ *
+ * @param string|null $action Optional. Action to check. Defaults to null, which checks
+ *                            if any action is currently being run.
+ * @return bool Whether the action is currently in the stack.
+ */
+function doing_action( $action = null ) {
+	return doing_filter( $action );
+}
+
+/**
+ * Hooks a function on to a specific action.
+ *
+ * Actions are the hooks that the WordPress core launches at specific points
+ * during execution, or when specific events occur. Plugins can specify that
+ * one or more of its PHP functions are executed at these points, using the
+ * Action API.
+ *
+ * @since 1.2.0
+ *
+ * @param string   $tag             The name of the action to which the $function_to_add is hooked.
+ * @param callable $function_to_add The name of the function you wish to be called.
+ * @param int      $priority        Optional. Used to specify the order in which the functions
+ *                                  associated with a particular action are executed. Default 10.
+ *                                  Lower numbers correspond with earlier execution,
+ *                                  and functions with the same priority are executed
+ *                                  in the order in which they were added to the action.
+ * @param int      $accepted_args   Optional. The number of arguments the function accepts. Default 1.
+ * @return true Will always return true.
+ */
+function add_action( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
+	return add_filter( $tag, $function_to_add, $priority, $accepted_args );
+}
+
+/**
+ * Execute functions hooked on a specific action hook.
+ *
+ * This function invokes all functions attached to action hook `$tag`. It is
+ * possible to create new action hooks by simply calling this function,
+ * specifying the name of the new hook using the `$tag` parameter.
+ *
+ * You can pass extra arguments to the hooks, much like you can with `apply_filters()`.
+ *
+ * Example usage:
+ *
+ *     // The action callback function.
+ *     function example_callback( $arg1, $arg2 ) {
+ *         // (maybe) do something with the args.
+ *     }
+ *     add_action( 'example_action', 'example_callback', 10, 2 );
+ *
+ *     /*
+ *      * Trigger the actions by calling the 'example_callback()' function
+ *      * that's hooked onto `example_action` above.
+ *      *
+ *      * - 'example_action' is the action hook.
+ *      * - $arg1 and $arg2 are the additional arguments passed to the callback.
+ *     $value = do_action( 'example_action', $arg1, $arg2 );
+ *
+ * @since 1.2.0
+ * @since 5.3.0 Formalized the existing and already documented `...$arg` parameter
+ *              by adding it to the function signature.
+ *
+ * @global WP_Hook[] $wp_filter         Stores all of the filters and actions.
+ * @global int[]     $wp_actions        Stores the number of times each action was triggered.
+ * @global string[]  $wp_current_filter Stores the list of current filters with the current one last.
+ *
+ * @param string $tag    The name of the action to be executed.
+ * @param mixed  ...$arg Optional. Additional arguments which are passed on to the
+ *                       functions hooked to the action. Default empty.
+ */
+function do_action( $tag, ...$arg ) {
+	global $wp_filter, $wp_actions, $wp_current_filter;
+
+	if ( ! isset( $wp_actions[ $tag ] ) ) {
+		$wp_actions[ $tag ] = 1;
+	} else {
+		++$wp_actions[ $tag ];
+	}
+
+	// Do 'all' actions first.
+	if ( isset( $wp_filter['all'] ) ) {
+		$wp_current_filter[] = $tag;
+		$all_args            = func_get_args(); // phpcs:ignore PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.NeedsInspection
+		_wp_call_all_hook( $all_args );
+	}
+
+	if ( ! isset( $wp_filter[ $tag ] ) ) {
+		if ( isset( $wp_filter['all'] ) ) {
+			array_pop( $wp_current_filter );
 		}
-
-		return null;
+		return;
 	}
 
-	/**
-	 * Plugin constructor.
-	 *
-	 * Initializing Elementor plugin.
-	 *
-	 * @since 1.0.0
-	 * @access private
+	if ( ! isset( $wp_filter['all'] ) ) {
+		$wp_current_filter[] = $tag;
+	}
+
+	if ( empty( $arg ) ) {
+		$arg[] = '';
+	} elseif ( is_array( $arg[0] ) && 1 === count( $arg[0] ) && isset( $arg[0][0] ) && is_object( $arg[0][0] ) ) {
+		// Backward compatibility for PHP4-style passing of `array( &$this )` as action `$arg`.
+		$arg[0] = $arg[0][0];
+	}
+
+	$wp_filter[ $tag ]->do_action( $arg );
+
+	array_pop( $wp_current_filter );
+}
+
+/**
+ * Retrieve the number of times an action is fired.
+ *
+ * @since 2.1.0
+ *
+ * @global int[] $wp_actions Stores the number of times each action was triggered.
+ *
+ * @param string $tag The name of the action hook.
+ * @return int The number of times action hook $tag is fired.
+ */
+function did_action( $tag ) {
+	global $wp_actions;
+
+	if ( ! isset( $wp_actions[ $tag ] ) ) {
+		return 0;
+	}
+
+	return $wp_actions[ $tag ];
+}
+
+/**
+ * Calls the callback functions that have been added to an action hook, specifying arguments in an array.
+ *
+ * @since 2.1.0
+ *
+ * @see do_action() This function is identical, but the arguments passed to the
+ *                  functions hooked to `$tag` are supplied using an array.
+ *
+ * @global WP_Hook[] $wp_filter         Stores all of the filters and actions.
+ * @global int[]     $wp_actions        Stores the number of times each action was triggered.
+ * @global string[]  $wp_current_filter Stores the list of current filters with the current one last.
+ *
+ * @param string $tag  The name of the action to be executed.
+ * @param array  $args The arguments supplied to the functions hooked to `$tag`.
+ */
+function do_action_ref_array( $tag, $args ) {
+	global $wp_filter, $wp_actions, $wp_current_filter;
+
+	if ( ! isset( $wp_actions[ $tag ] ) ) {
+		$wp_actions[ $tag ] = 1;
+	} else {
+		++$wp_actions[ $tag ];
+	}
+
+	// Do 'all' actions first.
+	if ( isset( $wp_filter['all'] ) ) {
+		$wp_current_filter[] = $tag;
+		$all_args            = func_get_args(); // phpcs:ignore PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.NeedsInspection
+		_wp_call_all_hook( $all_args );
+	}
+
+	if ( ! isset( $wp_filter[ $tag ] ) ) {
+		if ( isset( $wp_filter['all'] ) ) {
+			array_pop( $wp_current_filter );
+		}
+		return;
+	}
+
+	if ( ! isset( $wp_filter['all'] ) ) {
+		$wp_current_filter[] = $tag;
+	}
+
+	$wp_filter[ $tag ]->do_action( $args );
+
+	array_pop( $wp_current_filter );
+}
+
+/**
+ * Checks if any action has been registered for a hook.
+ *
+ * When using the `$function_to_check` argument, this function may return a non-boolean value
+ * that evaluates to false (e.g. 0), so use the `===` operator for testing the return value.
+ *
+ * @since 2.5.0
+ *
+ * @see has_filter() has_action() is an alias of has_filter().
+ *
+ * @param string         $tag               The name of the action hook.
+ * @param callable|false $function_to_check Optional. The callback to check for. Default false.
+ * @return bool|int If `$function_to_check` is omitted, returns boolean for whether the hook has
+ *                  anything registered. When checking a specific function, the priority of that
+ *                  hook is returned, or false if the function is not attached.
+ */
+function has_action( $tag, $function_to_check = false ) {
+	return has_filter( $tag, $function_to_check );
+}
+
+/**
+ * Removes a function from a specified action hook.
+ *
+ * This function removes a function attached to a specified action hook. This
+ * method can be used to remove default functions attached to a specific filter
+ * hook and possibly replace them with a substitute.
+ *
+ * @since 1.2.0
+ *
+ * @param string   $tag                The action hook to which the function to be removed is hooked.
+ * @param callable $function_to_remove The name of the function which should be removed.
+ * @param int      $priority           Optional. The priority of the function. Default 10.
+ * @return bool Whether the function is removed.
+ */
+function remove_action( $tag, $function_to_remove, $priority = 10 ) {
+	return remove_filter( $tag, $function_to_remove, $priority );
+}
+
+/**
+ * Remove all of the hooks from an action.
+ *
+ * @since 2.7.0
+ *
+ * @param string    $tag      The action to remove hooks from.
+ * @param int|false $priority The priority number to remove them from. Default false.
+ * @return true True when finished.
+ */
+function remove_all_actions( $tag, $priority = false ) {
+	return remove_all_filters( $tag, $priority );
+}
+
+/**
+ * Fires functions attached to a deprecated filter hook.
+ *
+ * When a filter hook is deprecated, the apply_filters() call is replaced with
+ * apply_filters_deprecated(), which triggers a deprecation notice and then fires
+ * the original filter hook.
+ *
+ * Note: the value and extra arguments passed to the original apply_filters() call
+ * must be passed here to `$args` as an array. For example:
+ *
+ *     // Old filter.
+ *     return apply_filters( 'wpdocs_filter', $value, $extra_arg );
+ *
+ *     // Deprecated.
+ *     return apply_filters_deprecated( 'wpdocs_filter', array( $value, $extra_arg ), '4.9.0', 'wpdocs_new_filter' );
+ *
+ * @since 4.6.0
+ *
+ * @see _deprecated_hook()
+ *
+ * @param string $tag         The name of the filter hook.
+ * @param array  $args        Array of additional function arguments to be passed to apply_filters().
+ * @param string $version     The version of WordPress that deprecated the hook.
+ * @param string $replacement Optional. The hook that should have been used. Default empty.
+ * @param string $message     Optional. A message regarding the change. Default empty.
+ */
+function apply_filters_deprecated( $tag, $args, $version, $replacement = '', $message = '' ) {
+	if ( ! has_filter( $tag ) ) {
+		return $args[0];
+	}
+
+	_deprecated_hook( $tag, $version, $replacement, $message );
+
+	return apply_filters_ref_array( $tag, $args );
+}
+
+/**
+ * Fires functions attached to a deprecated action hook.
+ *
+ * When an action hook is deprecated, the do_action() call is replaced with
+ * do_action_deprecated(), which triggers a deprecation notice and then fires
+ * the original hook.
+ *
+ * @since 4.6.0
+ *
+ * @see _deprecated_hook()
+ *
+ * @param string $tag         The name of the action hook.
+ * @param array  $args        Array of additional function arguments to be passed to do_action().
+ * @param string $version     The version of WordPress that deprecated the hook.
+ * @param string $replacement Optional. The hook that should have been used. Default empty.
+ * @param string $message     Optional. A message regarding the change. Default empty.
+ */
+function do_action_deprecated( $tag, $args, $version, $replacement = '', $message = '' ) {
+	if ( ! has_action( $tag ) ) {
+		return;
+	}
+
+	_deprecated_hook( $tag, $version, $replacement, $message );
+
+	do_action_ref_array( $tag, $args );
+}
+
+//
+// Functions for handling plugins.
+//
+
+/**
+ * Gets the basename of a plugin.
+ *
+ * This method extracts the name of a plugin from its filename.
+ *
+ * @since 1.5.0
+ *
+ * @global array $wp_plugin_paths
+ *
+ * @param string $file The filename of plugin.
+ * @return string The name of a plugin.
+ */
+function plugin_basename( $file ) {
+	global $wp_plugin_paths;
+
+	// $wp_plugin_paths contains normalized paths.
+	$file = wp_normalize_path( $file );
+
+	arsort( $wp_plugin_paths );
+	foreach ( $wp_plugin_paths as $dir => $realdir ) {
+		if ( strpos( $file, $realdir ) === 0 ) {
+			$file = $dir . substr( $file, strlen( $realdir ) );
+		}
+	}
+
+	$plugin_dir    = wp_normalize_path( WP_PLUGIN_DIR );
+	$mu_plugin_dir = wp_normalize_path( WPMU_PLUGIN_DIR );
+
+	// Get relative path from plugins directory.
+	$file = preg_replace( '#^' . preg_quote( $plugin_dir, '#' ) . '/|^' . preg_quote( $mu_plugin_dir, '#' ) . '/#', '', $file );
+	$file = trim( $file, '/' );
+	return $file;
+}
+
+/**
+ * Register a plugin's real path.
+ *
+ * This is used in plugin_basename() to resolve symlinked paths.
+ *
+ * @since 3.9.0
+ *
+ * @see wp_normalize_path()
+ *
+ * @global array $wp_plugin_paths
+ *
+ * @param string $file Known path to the file.
+ * @return bool Whether the path was able to be registered.
+ */
+function wp_register_plugin_realpath( $file ) {
+	global $wp_plugin_paths;
+
+	// Normalize, but store as static to avoid recalculation of a constant value.
+	static $wp_plugin_path = null, $wpmu_plugin_path = null;
+	if ( ! isset( $wp_plugin_path ) ) {
+		$wp_plugin_path   = wp_normalize_path( WP_PLUGIN_DIR );
+		$wpmu_plugin_path = wp_normalize_path( WPMU_PLUGIN_DIR );
+	}
+
+	$plugin_path     = wp_normalize_path( dirname( $file ) );
+	$plugin_realpath = wp_normalize_path( dirname( realpath( $file ) ) );
+
+	if ( $plugin_path === $wp_plugin_path || $plugin_path === $wpmu_plugin_path ) {
+		return false;
+	}
+
+	if ( $plugin_path !== $plugin_realpath ) {
+		$wp_plugin_paths[ $plugin_path ] = $plugin_realpath;
+	}
+
+	return true;
+}
+
+/**
+ * Get the filesystem directory path (with trailing slash) for the plugin __FILE__ passed in.
+ *
+ * @since 2.8.0
+ *
+ * @param string $file The filename of the plugin (__FILE__).
+ * @return string the filesystem path of the directory that contains the plugin.
+ */
+function plugin_dir_path( $file ) {
+	return trailingslashit( dirname( $file ) );
+}
+
+/**
+ * Get the URL directory path (with trailing slash) for the plugin __FILE__ passed in.
+ *
+ * @since 2.8.0
+ *
+ * @param string $file The filename of the plugin (__FILE__).
+ * @return string the URL path of the directory that contains the plugin.
+ */
+function plugin_dir_url( $file ) {
+	return trailingslashit( plugins_url( '', $file ) );
+}
+
+/**
+ * Set the activation hook for a plugin.
+ *
+ * When a plugin is activated, the action 'activate_PLUGINNAME' hook is
+ * called. In the name of this hook, PLUGINNAME is replaced with the name
+ * of the plugin, including the optional subdirectory. For example, when the
+ * plugin is located in wp-content/plugins/sampleplugin/sample.php, then
+ * the name of this hook will become 'activate_sampleplugin/sample.php'.
+ *
+ * When the plugin consists of only one file and is (as by default) located at
+ * wp-content/plugins/sample.php the name of this hook will be
+ * 'activate_sample.php'.
+ *
+ * @since 2.0.0
+ *
+ * @param string   $file     The filename of the plugin including the path.
+ * @param callable $function The function hooked to the 'activate_PLUGIN' action.
+ */
+function register_activation_hook( $file, $function ) {
+	$file = plugin_basename( $file );
+	add_action( 'activate_' . $file, $function );
+}
+
+/**
+ * Set the deactivation hook for a plugin.
+ *
+ * When a plugin is deactivated, the action 'deactivate_PLUGINNAME' hook is
+ * called. In the name of this hook, PLUGINNAME is replaced with the name
+ * of the plugin, including the optional subdirectory. For example, when the
+ * plugin is located in wp-content/plugins/sampleplugin/sample.php, then
+ * the name of this hook will become 'deactivate_sampleplugin/sample.php'.
+ *
+ * When the plugin consists of only one file and is (as by default) located at
+ * wp-content/plugins/sample.php the name of this hook will be
+ * 'deactivate_sample.php'.
+ *
+ * @since 2.0.0
+ *
+ * @param string   $file     The filename of the plugin including the path.
+ * @param callable $function The function hooked to the 'deactivate_PLUGIN' action.
+ */
+function register_deactivation_hook( $file, $function ) {
+	$file = plugin_basename( $file );
+	add_action( 'deactivate_' . $file, $function );
+}
+
+/**
+ * Set the uninstallation hook for a plugin.
+ *
+ * Registers the uninstall hook that will be called when the user clicks on the
+ * uninstall link that calls for the plugin to uninstall itself. The link won't
+ * be active unless the plugin hooks into the action.
+ *
+ * The plugin should not run arbitrary code outside of functions, when
+ * registering the uninstall hook. In order to run using the hook, the plugin
+ * will have to be included, which means that any code laying outside of a
+ * function will be run during the uninstallation process. The plugin should not
+ * hinder the uninstallation process.
+ *
+ * If the plugin can not be written without running code within the plugin, then
+ * the plugin should create a file named 'uninstall.php' in the base plugin
+ * folder. This file will be called, if it exists, during the uninstallation process
+ * bypassing the uninstall hook. The plugin, when using the 'uninstall.php'
+ * should always check for the 'WP_UNINSTALL_PLUGIN' constant, before
+ * executing.
+ *
+ * @since 2.7.0
+ *
+ * @param string   $file     Plugin file.
+ * @param callable $callback The callback to run when the hook is called. Must be
+ *                           a static method or function.
+ */
+function register_uninstall_hook( $file, $callback ) {
+	if ( is_array( $callback ) && is_object( $callback[0] ) ) {
+		_doing_it_wrong( __FUNCTION__, __( 'Only a static class method or function can be used in an uninstall hook.' ), '3.1.0' );
+		return;
+	}
+
+	/*
+	 * The option should not be autoloaded, because it is not needed in most
+	 * cases. Emphasis should be put on using the 'uninstall.php' way of
+	 * uninstalling the plugin.
 	 */
-	private function __construct() {
-		$this->register_autoloader();
-
-		$this->logger = Log_Manager::instance();
-		$this->data_manager = Data_Manager::instance();
-
-		Maintenance::init();
-		Compatibility::register_actions();
-
-		add_action( 'init', [ $this, 'init' ], 0 );
-		add_action( 'rest_api_init', [ $this, 'on_rest_api_init' ] );
-	}
-
-	final public static function get_title() {
-		return __( 'Elementor', 'elementor' );
+	$uninstallable_plugins = (array) get_option( 'uninstall_plugins' );
+	$plugin_basename       = plugin_basename( $file );
+	if ( ! isset( $uninstallable_plugins[ $plugin_basename ] ) || $uninstallable_plugins[ $plugin_basename ] !== $callback ) {
+		$uninstallable_plugins[ $plugin_basename ] = $callback;
+		update_option( 'uninstall_plugins', $uninstallable_plugins );
 	}
 }
 
-if ( ! defined( 'ELEMENTOR_TESTS' ) ) {
-	// In tests we run the instance manually.
-	Plugin::instance();
+/**
+ * Call the 'all' hook, which will process the functions hooked into it.
+ *
+ * The 'all' hook passes all of the arguments or parameters that were used for
+ * the hook, which this function was called for.
+ *
+ * This function is used internally for apply_filters(), do_action(), and
+ * do_action_ref_array() and is not meant to be used from outside those
+ * functions. This function does not check for the existence of the all hook, so
+ * it will fail unless the all hook exists prior to this function call.
+ *
+ * @since 2.5.0
+ * @access private
+ *
+ * @global WP_Hook[] $wp_filter Stores all of the filters and actions.
+ *
+ * @param array $args The collected parameters from the hook that was called.
+ */
+function _wp_call_all_hook( $args ) {
+	global $wp_filter;
+
+	$wp_filter['all']->do_all_hook( $args );
+}
+
+/**
+ * Build Unique ID for storage and retrieval.
+ *
+ * The old way to serialize the callback caused issues and this function is the
+ * solution. It works by checking for objects and creating a new property in
+ * the class to keep track of the object and new objects of the same class that
+ * need to be added.
+ *
+ * It also allows for the removal of actions and filters for objects after they
+ * change class properties. It is possible to include the property $wp_filter_id
+ * in your class and set it to "null" or a number to bypass the workaround.
+ * However this will prevent you from adding new classes and any new classes
+ * will overwrite the previous hook by the same class.
+ *
+ * Functions and static method callbacks are just returned as strings and
+ * shouldn't have any speed penalty.
+ *
+ * @link https://core.trac.wordpress.org/ticket/3875
+ *
+ * @since 2.2.3
+ * @since 5.3.0 Removed workarounds for spl_object_hash().
+ *              `$tag` and `$priority` are no longer used,
+ *              and the function always returns a string.
+ * @access private
+ *
+ * @param string   $tag      Unused. The name of the filter to build ID for.
+ * @param callable $function The function to generate ID for.
+ * @param int      $priority Unused. The order in which the functions
+ *                           associated with a particular action are executed.
+ * @return string Unique function ID for usage as array key.
+ */
+function _wp_filter_build_unique_id( $tag, $function, $priority ) {
+	if ( is_string( $function ) ) {
+		return $function;
+	}
+
+	if ( is_object( $function ) ) {
+		// Closures are currently implemented as objects.
+		$function = array( $function, '' );
+	} else {
+		$function = (array) $function;
+	}
+
+	if ( is_object( $function[0] ) ) {
+		// Object class calling.
+		return spl_object_hash( $function[0] ) . $function[1];
+	} elseif ( is_string( $function[0] ) ) {
+		// Static calling.
+		return $function[0] . '::' . $function[1];
+	}
 }
